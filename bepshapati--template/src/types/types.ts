@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 export interface Rating {
 	nifar: number;
 	afia: number;
@@ -6,8 +8,7 @@ export interface Rating {
 }
 
 export interface Product {
-	_id?: string;
-	id: number;
+	_id?: ObjectId;
 	name: string;
 	imageUrl: string;
 	ratings: Rating;

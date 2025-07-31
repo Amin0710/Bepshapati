@@ -3,7 +3,7 @@ import express, { Express } from "express";
 import cors from "cors";
 import { connectToDB, db } from "./db.js";
 import { Product } from "../src/types/types.js";
-import { MongoServerError } from "mongodb";
+import { MongoServerError, ObjectId } from "mongodb";
 
 const app: Express = express();
 app.use(
@@ -43,18 +43,42 @@ app.get("/api/products", async (req, res) => {
 	}
 });
 
+app.get("/api/products/:id", async (req, res) => {
+	try {
+		const productIdStr = req.params.id;
+
+		if (!ObjectId.isValid(productIdStr)) {
+			return res.status(400).json({ error: "Invalid product ID format" });
+		}
+
+		const product = await db
+			.collection<Product>("products")
+			.findOne({ _id: new ObjectId(productIdStr) });
+
+		if (!product) {
+			return res.status(404).json({ error: "Product not found" });
+		}
+
+		res.json(product);
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			res.status(500).json({ error: error.message });
+		} else {
+			res.status(500).json({ error: "An unknown error occurred" });
+		}
+	}
+});
+
 app.post("/api/products", async (req, res) => {
 	try {
-		// 1. Validate request body
 		if (!req.body.name || !req.body.imageUrl) {
 			return res
 				.status(400)
 				.json({ error: "Missing required fields: name and imageUrl" });
 		}
 
-		// 2. Create product document
-		const product: Product = {
-			id: Date.now(), // Better than length+1 for unique IDs
+		// Create product object without 'id' field
+		const product = {
 			name: req.body.name,
 			imageUrl: req.body.imageUrl,
 			ratings: {
@@ -67,49 +91,38 @@ app.post("/api/products", async (req, res) => {
 			createdAt: new Date(),
 		};
 
-		// 3. Insert into MongoDB
-		const result = await db.collection<Product>("products").insertOne(product);
+		// Insert into MongoDB
+		const result = await db.collection("products").insertOne(product);
 
-		// 4. Return success response
 		res.status(201).json({
 			...product,
 			_id: result.insertedId,
 		});
-	} catch (error: unknown) {
-		// Handle specific MongoDB errors
-		if (error instanceof MongoServerError) {
-			if (error.code === 11000) {
-				// Duplicate key error
-				return res.status(409).json({
-					error: "Product with this ID already exists",
-				});
-			}
-			return res.status(500).json({
-				error: "Database operation failed",
-				details: error.errmsg,
-			});
+	} catch (error) {
+		if (error instanceof MongoServerError && error.code === 11000) {
+			return res
+				.status(409)
+				.json({ error: "Product with this ID already exists" });
 		}
-
-		// Generic error handling
 		if (error instanceof Error) {
-			return res.status(500).json({
-				error: error.message,
-			});
+			return res.status(500).json({ error: error.message });
 		}
-
-		res.status(500).json({
-			error: "Unknown error occurred",
-		});
+		res.status(500).json({ error: "Unknown error occurred" });
 	}
 });
 
-app.put("/api/products/:id/ratings", async (req, res) => {
+app.put("/api/products/:id", async (req, res) => {
 	try {
-		const productId = parseInt(req.params.id);
+		const productIdStr = req.params.id;
+
+		// Validate ObjectId format
+		if (!ObjectId.isValid(productIdStr)) {
+			return res.status(400).json({ error: "Invalid product ID format" });
+		}
+
 		const { ratings, comment } = req.body;
 
-		// Validate input
-		if (!ratings && !comment) {
+		if (!ratings && comment === undefined) {
 			return res.status(400).json({ error: "Must provide ratings or comment" });
 		}
 
@@ -128,10 +141,9 @@ app.put("/api/products/:id/ratings", async (req, res) => {
 			updateData.comment = comment;
 		}
 
-		// MongoDB update
 		const result = await db
 			.collection<Product>("products")
-			.updateOne({ id: productId }, { $set: updateData });
+			.updateOne({ _id: new ObjectId(productIdStr) }, { $set: updateData });
 
 		if (result.matchedCount === 0) {
 			return res.status(404).json({ error: "Product not found" });
