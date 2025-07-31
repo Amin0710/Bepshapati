@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { Express } from "express";
 import cors from "cors";
 import { connectToDB, db } from "./db.js";
-import { Product } from "../src/types/types.js";
+import { ProductDB } from "../src/types/types.js";
 import { MongoServerError, ObjectId } from "mongodb";
 
 const app: Express = express();
@@ -52,14 +52,21 @@ app.get("/api/products/:id", async (req, res) => {
 		}
 
 		const product = await db
-			.collection<Product>("products")
+			.collection<ProductDB>("products")
 			.findOne({ _id: new ObjectId(productIdStr) });
 
 		if (!product) {
 			return res.status(404).json({ error: "Product not found" });
 		}
 
-		res.json(product);
+		// Convert ObjectId and Date to string for frontend
+		const productResponse = {
+			...product,
+			_id: product._id?.toString(),
+			createdAt: product.createdAt?.toISOString(),
+		};
+
+		res.json(productResponse);
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			res.status(500).json({ error: error.message });
@@ -96,7 +103,7 @@ app.post("/api/products", async (req, res) => {
 
 		res.status(201).json({
 			...product,
-			_id: result.insertedId,
+			_id: result.insertedId.toString(),
 		});
 	} catch (error) {
 		if (error instanceof MongoServerError && error.code === 11000) {
@@ -126,14 +133,21 @@ app.put("/api/products/:id", async (req, res) => {
 			return res.status(400).json({ error: "Must provide ratings or comment" });
 		}
 
-		const updateData: Partial<Product> = {};
+		const updateData: Partial<ProductDB> = {};
 
 		if (ratings) {
+			const existingProduct = await db
+				.collection<ProductDB>("products")
+				.findOne({ _id: new ObjectId(productIdStr) });
+			if (!existingProduct) {
+				return res.status(404).json({ error: "Product not found" });
+			}
+
 			updateData.ratings = {
-				nifar: ratings.nifar ?? 0,
-				afia: ratings.afia ?? 0,
-				sijil: ratings.sijil ?? 0,
-				naim: ratings.naim ?? 0,
+				nifar: ratings.nifar ?? existingProduct.ratings.nifar,
+				afia: ratings.afia ?? existingProduct.ratings.afia,
+				sijil: ratings.sijil ?? existingProduct.ratings.sijil,
+				naim: ratings.naim ?? existingProduct.ratings.naim,
 			};
 		}
 
@@ -142,7 +156,7 @@ app.put("/api/products/:id", async (req, res) => {
 		}
 
 		const result = await db
-			.collection<Product>("products")
+			.collection<Omit<ProductDB, "_id"> & { _id: ObjectId }>("products")
 			.updateOne({ _id: new ObjectId(productIdStr) }, { $set: updateData });
 
 		if (result.matchedCount === 0) {

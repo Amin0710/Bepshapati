@@ -1,6 +1,6 @@
 // src/App.tsx
 import { useState } from "react";
-import type { Product, Reviewer } from "./types/types";
+import type { ProductAPI, Reviewer } from "./types/types";
 import Header from "./components/Header";
 import { CatalogueRow } from "./components/CatalogueRow";
 import { fetchProducts, saveProduct } from "./api/products";
@@ -8,16 +8,16 @@ import { useEffect } from "react";
 
 // src/App.tsx
 export default function App() {
-	const [products, setProducts] = useState<Product[]>([]);
+	const [products, setProducts] = useState<ProductAPI[]>([]);
 
 	useEffect(() => {
 		fetchProducts().then((data) => setProducts(data));
 	}, []);
 
-	const handleRatingChange = (id: number, field: Reviewer, value: number) => {
+	const handleRatingChange = (id: string, field: Reviewer, value: number) => {
 		setProducts(
 			products.map((product) =>
-				product.id === id
+				product._id === id
 					? {
 							...product,
 							ratings: { ...product.ratings, [field]: value },
@@ -27,16 +27,16 @@ export default function App() {
 		);
 	};
 
-	const handleCommentChange = (id: number, comment: string) => {
+	const handleCommentChange = (id: string, comment: string) => {
 		setProducts(
 			products.map((product) =>
-				product.id === id ? { ...product, comment } : product
+				product._id === id ? { ...product, comment } : product
 			)
 		);
 	};
 
-	const handleNameChange = (id: number, name: string) => {
-		setProducts(products.map((p) => (p.id === id ? { ...p, name } : p)));
+	const handleNameChange = (id: string, name: string) => {
+		setProducts(products.map((p) => (p._id === id ? { ...p, name } : p)));
 	};
 
 	const handleSave = async () => {
@@ -49,8 +49,7 @@ export default function App() {
 	};
 
 	const addNewRow = () => {
-		const newProduct: Product = {
-			id: products.length + 1,
+		const newProduct: ProductAPI = {
 			name: `Product ${products.length + 1}`,
 			imageUrl: `https://placehold.co/100x100/A78BFA/FFFFFF?text=Product+${
 				products.length + 1
@@ -76,7 +75,7 @@ export default function App() {
 
 					{products.map((product) => (
 						<CatalogueRow
-							key={product.id}
+							key={product._id}
 							product={product}
 							onRatingChange={handleRatingChange}
 							onCommentChange={handleCommentChange}

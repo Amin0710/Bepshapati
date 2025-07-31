@@ -1,14 +1,14 @@
-import { Product } from "../types/types";
+import { ProductAPI } from "../types/types";
 
 const API_BASE = "http://localhost:3001/api";
 
-export const fetchProducts = async (): Promise<Product[]> => {
+export const fetchProducts = async (): Promise<ProductAPI[]> => {
 	const response = await fetch(`${API_BASE}/products`);
 	if (!response.ok) throw new Error("Failed to fetch products");
 	return await response.json();
 };
 
-export const saveProduct = async (product: Product): Promise<Product> => {
+export const saveProduct = async (product: ProductAPI): Promise<ProductAPI> => {
 	const response = await fetch(`${API_BASE}/products`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },

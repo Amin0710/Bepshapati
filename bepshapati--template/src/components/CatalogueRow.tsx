@@ -1,11 +1,11 @@
 import { StarRating } from "./StarRating";
-import type { Product, Reviewer } from "../types/types";
+import type { ProductAPI, Reviewer } from "../types/types";
 
 interface CatalogueRowProps {
-	product: Product;
-	onRatingChange: (id: number, field: Reviewer, value: number) => void;
-	onCommentChange: (id: number, comment: string) => void;
-	onNameChange: (id: number, name: string) => void;
+	product: ProductAPI;
+	onRatingChange: (id: string, field: Reviewer, value: number) => void;
+	onCommentChange: (id: string, comment: string) => void;
+	onNameChange: (id: string, name: string) => void;
 }
 
 export function CatalogueRow({
@@ -20,7 +20,7 @@ export function CatalogueRow({
 			<div>
 				<img
 					src={product.imageUrl}
-					alt={`Product ${product.id}`}
+					alt={`Product ${product._id}`}
 					className="w-16 h-16 object-cover rounded-md"
 				/>
 			</div>
@@ -30,7 +30,7 @@ export function CatalogueRow({
 				<input
 					type="text"
 					value={product.name}
-					onChange={(e) => onNameChange(product.id, e.target.value)}
+					onChange={(e) => onNameChange(product._id ?? "", e.target.value)}
 					className="w-full p-2 border border-gray-300 rounded-md"
 					placeholder="Product name"
 				/>
@@ -41,7 +41,9 @@ export function CatalogueRow({
 				<div key={reviewer}>
 					<StarRating
 						value={product.ratings[reviewer]}
-						onChange={(value) => onRatingChange(product.id, reviewer, value)}
+						onChange={(value) =>
+							onRatingChange(product._id ?? "", reviewer, value)
+						}
 					/>
 				</div>
 			))}
@@ -51,7 +53,7 @@ export function CatalogueRow({
 				<input
 					type="text"
 					value={product.comment}
-					onChange={(e) => onCommentChange(product.id, e.target.value)}
+					onChange={(e) => onCommentChange(product._id ?? "", e.target.value)}
 					className="w-full p-2 border border-gray-300 rounded-md"
 					placeholder="Comments..."
 				/>

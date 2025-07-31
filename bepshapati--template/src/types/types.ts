@@ -6,9 +6,17 @@ export interface Rating {
 	sijil: number;
 	naim: number;
 }
-
-export interface Product {
+export interface ProductDB {
 	_id?: ObjectId;
+	name: string;
+	imageUrl: string;
+	ratings: Rating;
+	comment: string;
+	createdAt?: Date;
+}
+
+export interface ProductAPI {
+	_id?: string;
 	name: string;
 	imageUrl: string;
 	ratings: Rating;
