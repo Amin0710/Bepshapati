@@ -1,7 +1,18 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"target": "ES2022",
+		"outDir": "./dist",
+		"rootDir": "./",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true
+	},
+	"ts-node": {
+		"esm": true,
+		"experimentalSpecifierResolution": "node",
+		"swc": true
+	},
+	"include": ["server/**/*", "src/types/**/*"]
 }

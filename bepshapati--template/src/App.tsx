@@ -2,25 +2,27 @@
 import { useState } from "react";
 import type { Product, Reviewer } from "./types/types";
 import Header from "./components/Header";
-import CatalogueRow from "./components/CatalogueRow";
+import { CatalogueRow } from "./components/CatalogueRow";
+import { fetchProducts, saveProduct } from "./api/products";
+import { useEffect } from "react";
 
+// src/App.tsx
 export default function App() {
-	const [products, setProducts] = useState<Product[]>([
-		{
-			id: 1,
-			imageUrl: "https://placehold.co/100x100/A78BFA/FFFFFF?text=Product+1",
-			nifar: 0,
-			afia: 0,
-			sijil: 0,
-			naim: 0,
-			comment: "",
-		},
-	]);
+	const [products, setProducts] = useState<Product[]>([]);
 
-	const handleToggle = (id: number, field: Reviewer) => {
+	useEffect(() => {
+		fetchProducts().then((data) => setProducts(data));
+	}, []);
+
+	const handleRatingChange = (id: number, field: Reviewer, value: number) => {
 		setProducts(
 			products.map((product) =>
-				product.id === id ? { ...product, [field]: !product[field] } : product
+				product.id === id
+					? {
+							...product,
+							ratings: { ...product.ratings, [field]: value },
+					  }
+					: product
 			)
 		);
 	};
@@ -33,16 +35,32 @@ export default function App() {
 		);
 	};
 
+	const handleNameChange = (id: number, name: string) => {
+		setProducts(products.map((p) => (p.id === id ? { ...p, name } : p)));
+	};
+
+	const handleSave = async () => {
+		try {
+			await Promise.all(products.map(saveProduct));
+			console.log("All products saved successfully");
+		} catch (error) {
+			console.error("Error saving products:", error);
+		}
+	};
+
 	const addNewRow = () => {
 		const newProduct: Product = {
 			id: products.length + 1,
+			name: `Product ${products.length + 1}`,
 			imageUrl: `https://placehold.co/100x100/A78BFA/FFFFFF?text=Product+${
 				products.length + 1
 			}`,
-			nifar: 0,
-			afia: 0,
-			sijil: 0,
-			naim: 0,
+			ratings: {
+				nifar: 0,
+				afia: 0,
+				sijil: 0,
+				naim: 0,
+			},
 			comment: "",
 		};
 		setProducts([...products, newProduct]);
@@ -54,31 +72,28 @@ export default function App() {
 				<Header />
 
 				<div className="p-4 sm:p-6">
-					{/* Table Header */}
-					<div className="grid grid-cols-1 md:grid-cols-6 gap-4 text-sm sm:text-base font-semibold text-gray-700 border-b-2 border-gray-300 pb-2 mb-4">
-						<div className="col-span-3 md:col-span-1">Image</div>
-						<div className="col-span-1 md:col-span-1">Nifar</div>
-						<div className="col-span-1 md:col-span-1">Afia</div>
-						<div className="col-span-1 md:col-span-1">Sijil</div>
-						<div className="col-span-1 md:col-span-1">Naim</div>
-						<div className="col-span-1 md:col-span-1">Comments</div>
-					</div>
+					{/* ... existing table header ... */}
 
-					{/* Product Rows */}
 					{products.map((product) => (
 						<CatalogueRow
 							key={product.id}
 							product={product}
-							onToggle={handleToggle}
+							onRatingChange={handleRatingChange}
 							onCommentChange={handleCommentChange}
+							onNameChange={handleNameChange}
 						/>
 					))}
 
-					<div className="mt-8 text-center">
+					<div className="mt-8 flex justify-center gap-4">
 						<button
 							onClick={addNewRow}
 							className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
 							Add New Row
+						</button>
+						<button
+							onClick={handleSave}
+							className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
+							Save All
 						</button>
 					</div>
 				</div>

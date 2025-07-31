@@ -1,52 +1,59 @@
-// src/components/CatalogueRow.tsx
+import { StarRating } from "./StarRating";
 import type { Product, Reviewer } from "../types/types";
 
 interface CatalogueRowProps {
 	product: Product;
-	onToggle: (id: number, field: Reviewer) => void;
+	onRatingChange: (id: number, field: Reviewer, value: number) => void;
 	onCommentChange: (id: number, comment: string) => void;
+	onNameChange: (id: number, name: string) => void;
 }
 
-export default function CatalogueRow({
+export function CatalogueRow({
 	product,
-	onToggle,
+	onRatingChange,
 	onCommentChange,
+	onNameChange,
 }: CatalogueRowProps) {
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-6 gap-4 items-center mb-4 pb-4 border-b border-gray-200">
-			{/* Image */}
-			<div className="col-span-1 md:col-span-1">
+		<div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-center py-4 border-b border-gray-200">
+			{/* Product Image */}
+			<div>
 				<img
 					src={product.imageUrl}
 					alt={`Product ${product.id}`}
-					className="w-full h-[100px] object-cover rounded-lg"
+					className="w-16 h-16 object-cover rounded-md"
 				/>
 			</div>
 
-			{/* Checkbox columns */}
-			{(["nifar", "afia", "sijil", "naim"] as Reviewer[]).map((field) => (
-				<div
-					key={field}
-					className="col-span-1 md:col-span-1 flex flex-col items-start">
-					<label className="inline-flex items-center">
-						<input
-							type="checkbox"
-							checked={product[reviewer]}
-							onChange={() => onToggle(product.id, field)}
-							className="h-4 w-4 text-indigo-600 rounded"
-						/>
-						<span className="ml-2 text-gray-700">Tick</span>
-					</label>
+			{/* Product Name */}
+			<div>
+				<input
+					type="text"
+					value={product.name}
+					onChange={(e) => onNameChange(product.id, e.target.value)}
+					className="w-full p-2 border border-gray-300 rounded-md"
+					placeholder="Product name"
+				/>
+			</div>
+
+			{/* Star Ratings */}
+			{(["nifar", "afia", "sijil", "naim"] as Reviewer[]).map((reviewer) => (
+				<div key={reviewer}>
+					<StarRating
+						value={product.ratings[reviewer]}
+						onChange={(value) => onRatingChange(product.id, reviewer, value)}
+					/>
 				</div>
 			))}
 
-			{/* Comment */}
-			<div className="col-span-1 md:col-span-1">
-				<textarea
+			{/* Comments */}
+			<div>
+				<input
+					type="text"
 					value={product.comment}
 					onChange={(e) => onCommentChange(product.id, e.target.value)}
-					placeholder="Add comments here..."
-					className="w-full p-2 border border-gray-300 rounded-md min-h-[80px] resize-y focus:border-indigo-500 transition"
+					className="w-full p-2 border border-gray-300 rounded-md"
+					placeholder="Comments..."
 				/>
 			</div>
 		</div>

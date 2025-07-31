@@ -1,12 +1,18 @@
-// src/types/types.ts
-export type Reviewer = "nifar" | "afia" | "sijil" | "naim";
-
-export interface Product {
-	id: number;
-	imageUrl: string;
+export interface Rating {
 	nifar: number;
 	afia: number;
 	sijil: number;
 	naim: number;
-	comment: string;
 }
+
+export interface Product {
+	_id?: string;
+	id: number;
+	name: string;
+	imageUrl: string;
+	ratings: Rating;
+	comment: string;
+	createdAt?: Date;
+}
+
+export type Reviewer = keyof Rating;
