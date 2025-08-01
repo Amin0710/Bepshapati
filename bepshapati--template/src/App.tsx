@@ -6,7 +6,6 @@ import { CatalogueRow } from "./components/CatalogueRow";
 import { fetchProducts, saveProduct } from "./api/products";
 import { useEffect } from "react";
 
-// src/App.tsx
 export default function App() {
 	const [products, setProducts] = useState<ProductAPI[]>([]);
 
@@ -35,10 +34,6 @@ export default function App() {
 		);
 	};
 
-	const handleNameChange = (id: string, name: string) => {
-		setProducts(products.map((p) => (p._id === id ? { ...p, name } : p)));
-	};
-
 	const handleSave = async () => {
 		try {
 			await Promise.all(products.map(saveProduct));
@@ -48,30 +43,37 @@ export default function App() {
 		}
 	};
 
-	const addNewRow = () => {
-		const newProduct: ProductAPI = {
-			name: `Product ${products.length + 1}`,
-			imageUrl: `https://placehold.co/100x100/A78BFA/FFFFFF?text=Product+${
-				products.length + 1
-			}`,
-			ratings: {
-				nifar: 0,
-				afia: 0,
-				sijil: 0,
-				naim: 0,
-			},
-			comment: "",
-		};
-		setProducts([...products, newProduct]);
-	};
+	// const addNewRow = () => {
+	// 	const newProduct: ProductAPI = {
+	// 		name: `Product ${products.length + 1}`,
+	// 		imageUrl: `https://placehold.co/100x100/A78BFA/FFFFFF?text=Product+${
+	// 			products.length + 1
+	// 		}`,
+	// 		ratings: {
+	// 			nifar: 0,
+	// 			afia: 0,
+	// 			sijil: 0,
+	// 			naim: 0,
+	// 		},
+	// 		comment: "",
+	// 	};
+	// 	setProducts([...products, newProduct]);
+	// };
 
 	return (
-		<div className="font-inter bg-gray-50 p-4 sm:p-6 md:p-8">
+		<div className="font-inter bg-gray-300 p-4 sm:p-6 md:p-8">
 			<div className="max-w-6xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden">
 				<Header />
 
 				<div className="p-4 sm:p-6">
-					{/* ... existing table header ... */}
+					<div className="grid grid-cols-[3fr_1fr_2fr_2fr] gap-4 items-center py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+						<div className="font-bold text-blue-600 text-center">Image</div>
+						<div className="font-bold text-blue-600 text-center">
+							Product Name
+						</div>
+						<div className="font-bold text-blue-600 text-center">Rating</div>
+						<div className="font-bold text-blue-600 text-center">Comments</div>
+					</div>
 
 					{products.map((product) => (
 						<CatalogueRow
@@ -79,16 +81,15 @@ export default function App() {
 							product={product}
 							onRatingChange={handleRatingChange}
 							onCommentChange={handleCommentChange}
-							onNameChange={handleNameChange}
 						/>
 					))}
 
 					<div className="mt-8 flex justify-center gap-4">
-						<button
+						{/* <button
 							onClick={addNewRow}
 							className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">
 							Add New Row
-						</button>
+						</button> */}
 						<button
 							onClick={handleSave}
 							className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">

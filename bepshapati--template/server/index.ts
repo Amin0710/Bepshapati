@@ -78,16 +78,16 @@ app.get("/api/products/:id", async (req, res) => {
 
 app.post("/api/products", async (req, res) => {
 	try {
-		if (!req.body.name || !req.body.imageUrl) {
+		if (!req.body.name || !Array.isArray(req.body.imageUrls)) {
 			return res
 				.status(400)
-				.json({ error: "Missing required fields: name and imageUrl" });
+				.json({ error: "Missing required fields: name and imageUrls" });
 		}
 
 		// Create product object without 'id' field
 		const product = {
 			name: req.body.name,
-			imageUrl: req.body.imageUrl,
+			imageUrls: req.body.imageUrls,
 			ratings: {
 				nifar: req.body.ratings?.nifar || 0,
 				afia: req.body.ratings?.afia || 0,

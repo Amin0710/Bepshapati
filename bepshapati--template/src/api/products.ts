@@ -9,11 +9,17 @@ export const fetchProducts = async (): Promise<ProductAPI[]> => {
 };
 
 export const saveProduct = async (product: ProductAPI): Promise<ProductAPI> => {
-	const response = await fetch(`${API_BASE}/products`, {
-		method: "POST",
+	const method = product._id ? "PUT" : "POST";
+	const url = product._id
+		? `${API_BASE}/products/${product._id}`
+		: `${API_BASE}/products`;
+
+	const response = await fetch(url, {
+		method,
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(product),
 	});
+
 	if (!response.ok) throw new Error("Failed to save product");
 	return await response.json();
 };

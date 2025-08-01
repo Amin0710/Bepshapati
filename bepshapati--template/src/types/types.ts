@@ -9,7 +9,7 @@ export interface Rating {
 export interface ProductDB {
 	_id?: ObjectId;
 	name: string;
-	imageUrl: string;
+	imageUrls: string[];
 	ratings: Rating;
 	comment: string;
 	createdAt?: Date;
@@ -18,7 +18,7 @@ export interface ProductDB {
 export interface ProductAPI {
 	_id?: string;
 	name: string;
-	imageUrl: string;
+	imageUrls: string[];
 	ratings: Rating;
 	comment: string;
 	createdAt?: Date;
