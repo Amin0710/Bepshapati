@@ -66,11 +66,8 @@ export default function App() {
 				<Header />
 
 				<div className="p-4 sm:p-6">
-					<div className="grid grid-cols-[3fr_1fr_2fr_2fr] gap-4 items-center py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+					<div className="grid grid-cols-3 gap-4 items-center py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
 						<div className="font-bold text-blue-600 text-center">Image</div>
-						<div className="font-bold text-blue-600 text-center">
-							Product Name
-						</div>
 						<div className="font-bold text-blue-600 text-center">Rating</div>
 						<div className="font-bold text-blue-600 text-center">Comments</div>
 					</div>

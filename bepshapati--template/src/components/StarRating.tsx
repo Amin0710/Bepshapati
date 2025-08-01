@@ -2,27 +2,49 @@ import { useState } from "react";
 
 interface StarRatingProps {
 	value: number;
-	onChange: (value: number) => void;
+	onChange?: (value: number) => void;
 }
 
 export function StarRating({ value, onChange }: StarRatingProps) {
-	const [hover, setHover] = useState(0);
+	const [hover, setHover] = useState<number | null>(null);
+	const fullStars = Math.floor(value);
+	const showHalfStar = value % 1 >= 0.5;
 
 	return (
-		<div className="flex space-x-1">
-			{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-				<button
-					key={star}
-					type="button"
-					className={`text-lg ${
-						star <= (hover || value) ? "text-yellow-400" : "text-gray-300"
-					}`}
-					onClick={() => onChange(star)}
-					onMouseEnter={() => setHover(star)}
-					onMouseLeave={() => setHover(0)}>
-					★
-				</button>
-			))}
+		<div className="flex items-center">
+			{[...Array(10)].map((_, i) => {
+				const starValue = i + 1;
+				const isActive =
+					hover !== null
+						? starValue <= hover
+						: starValue <= fullStars ||
+						  (showHalfStar && starValue === fullStars + 1);
+				const isHalfActive = showHalfStar && starValue === fullStars + 1;
+
+				return (
+					<button
+						key={i}
+						type="button"
+						className={`relative text-lg w-5 h-5 ${
+							onChange ? "cursor-pointer" : "cursor-default"
+						}`}
+						onClick={() => onChange?.(starValue)}
+						onMouseEnter={() => onChange && setHover(starValue)}
+						onMouseLeave={() => onChange && setHover(null)}>
+						{/* Gray background star (always shows) */}
+						<span className="text-gray-300 absolute inset-0">★</span>
+
+						{/* Yellow star (fills based on value/hover) */}
+						<span
+							className={`absolute inset-0 ${
+								isActive ? "text-yellow-400" : "text-transparent"
+							}`}
+							style={{ clipPath: isHalfActive ? "inset(0 50% 0 0)" : "none" }}>
+							★
+						</span>
+					</button>
+				);
+			})}
 		</div>
 	);
 }

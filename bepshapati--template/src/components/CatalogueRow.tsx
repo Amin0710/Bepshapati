@@ -1,6 +1,7 @@
 //CatalogueRowProps
 import { StarRating } from "./StarRating";
 import type { ProductAPI, Reviewer } from "../types/types";
+import ImageCarousel from "./ImageCarousel";
 
 interface CatalogueRowProps {
 	product: ProductAPI;
@@ -14,26 +15,18 @@ export function CatalogueRow({
 	onCommentChange,
 }: CatalogueRowProps) {
 	return (
-		<div className="grid grid-cols-[3fr_1fr_2fr_2fr] gap-4 items-center py-4 border-b border-gray-200">
-			{/* Image */}
-			<div className="flex flex-wrap gap-1">
-				{product.imageUrls.map((url, index) => (
-					<img
-						key={index}
-						src={url}
-						alt={`Product ${product._id} - ${index + 1}`}
-						className="w-16 h-16 object-cover rounded-md"
-					/>
-				))}
-			</div>
-
-			{/* Product Name (not editable) */}
-			<div className="flex items-center">
-				<span className="block p-2">{product.name}</span>
+		<div className="grid grid-cols-3 gap-4 items-center py-4 border-b border-gray-300">
+			{/* Combined Product images and name */}
+			<div className="flex flex-col">
+				<ImageCarousel imageUrls={product.imageUrls} />
+				{/* Product Name (not editable) - now placed under the image */}
+				<div className="flex items-center justify-center mt-2 max-w-[300px]">
+					<span className="block p-2 truncate">{product.name}</span>
+				</div>
 			</div>
 
 			{/* Ratings as vertical stack */}
-			<div className="flex flex-col justify-between h-full">
+			<div className="flex flex-col justify-between">
 				{(["nifar", "afia", "sijil", "naim"] as Reviewer[]).map((reviewer) => (
 					<div key={reviewer} className="flex items-center mb-1">
 						<span className="w-14 inline-block text-gray-600">
