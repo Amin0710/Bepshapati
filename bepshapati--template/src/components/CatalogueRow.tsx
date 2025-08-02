@@ -39,7 +39,7 @@ export function CatalogueRow({
 	};
 
 	return (
-		<div className="grid grid-cols-3 gap-4 items-center py-4 border-b border-gray-300">
+		<div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:items-center py-4 border-b border-gray-300">
 			{/* Combined Product images and name */}
 			<div className="flex flex-col">
 				<ImageCarousel imageUrls={product.imageUrls} />
@@ -50,7 +50,7 @@ export function CatalogueRow({
 			</div>
 
 			{/* Ratings as vertical stack */}
-			<div className="flex flex-col justify-between pr-2">
+			<div className="flex flex-col justify-between pr-2 items-center">
 				{(["nifar", "afia", "sijil", "naim", "average"] as const).map(
 					(reviewer) => (
 						<div key={reviewer} className="flex items-center mb-2">
@@ -88,11 +88,10 @@ export function CatalogueRow({
 							type="number"
 							min={0}
 							max={10}
-							step={0.5} // This allows 0.5 increments
+							step={0.5}
 							value={userRatingValue}
 							onChange={(e) => {
 								let newRating = Number(e.target.value);
-								// Ensure value stays within bounds and is multiple of 0.5
 								newRating = Math.max(0, Math.min(10, newRating));
 								newRating = Math.round(newRating * 2) / 2; // Round to nearest 0.5
 

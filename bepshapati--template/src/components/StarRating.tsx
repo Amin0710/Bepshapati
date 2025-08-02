@@ -30,7 +30,7 @@ export function StarRating({
 					<button
 						key={i}
 						type="button"
-						className={`relative text-xl w-6 h-6 ${
+						className={`relative text-xs w-4 h-4 sm:text-xl sm:w-6 sm:h-6 ${
 							onChange && !readOnly ? "cursor-pointer" : "cursor-default"
 						}`}
 						onClick={() => !readOnly && onChange?.(starValue)}
