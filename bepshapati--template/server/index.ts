@@ -129,19 +129,41 @@ app.put("/api/products/:id", async (req, res) => {
 			return res.status(400).json({ error: "Invalid product ID format" });
 		}
 
-		// Require at least one rating field (like ratings.naim, ratings.nifar)
+		// Allow comment-only updates
+		if (updates.comment && !updates.ratings) {
+			const updateDoc = {
+				$set: {
+					comment: updates.comment,
+					lastModifiedAt: new Date(),
+				},
+			};
+
+			const result = await db
+				.collection("products")
+				.updateOne({ _id: new ObjectId(id) }, updateDoc);
+
+			if (result.matchedCount === 0) {
+				return res.status(404).json({ error: "Product not found" });
+			}
+
+			return res.json({
+				message: "Comment updated successfully",
+				product: updateDoc.$set,
+			});
+		}
+
+		// Existing rating-required logic
 		const isUpdatingRatings = Object.keys(updates).some((key) =>
 			key.startsWith("ratings.")
 		);
 
 		if (!isUpdatingRatings) {
-			return res.status(400).json({ error: "Rating is required" });
+			return res
+				.status(400)
+				.json({ error: "Rating is required for product updates" });
 		}
 
-		// Add metadata
-		// updates.lastModifiedBy = req.user?._id;
 		updates.lastModifiedAt = new Date();
-
 		const result = await db
 			.collection("products")
 			.updateOne({ _id: new ObjectId(id) }, { $set: updates });

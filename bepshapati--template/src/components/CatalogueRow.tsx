@@ -3,18 +3,19 @@ import { StarRating } from "./StarRating";
 import type { ProductAPI, Reviewer } from "../types/types";
 import ImageCarousel from "./ImageCarousel";
 import { useEffect, useState } from "react";
+import { CommentSection } from "./CommentSection";
 
 interface CatalogueRowProps {
 	product: ProductAPI;
 	onRatingChange: (id: string, field: Reviewer, value: number) => void;
-	onCommentChange: (id: string, comment: string) => void;
+	onSaveComment: (id: string, comment: string) => Promise<void>;
 	currentUser: { username: string; name: string } | null;
 }
 
 export function CatalogueRow({
 	product,
 	onRatingChange,
-	onCommentChange,
+	onSaveComment,
 	currentUser,
 }: CatalogueRowProps) {
 	const [userRatingValue, setUserRatingValue] = useState<string | number>("");
@@ -109,11 +110,13 @@ export function CatalogueRow({
 
 			{/* Comment */}
 			<div className="h-full flex items-center">
-				<textarea
-					value={product.comment}
-					onChange={(e) => onCommentChange(product._id ?? "", e.target.value)}
-					className="h-[65%] w-full p-2 border border-gray-300 rounded-md"
-					placeholder="Comments..."
+				<CommentSection
+					product={product}
+					currentUser={{
+						name: currentUser?.name || "Anonymous",
+						username: currentUser?.username || "anonymous", // Add this
+					}}
+					onSaveComment={onSaveComment}
 				/>
 			</div>
 		</div>

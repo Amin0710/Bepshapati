@@ -16,52 +16,64 @@ export function LoginModal({ onLogin, onClose, error }: LoginModalProps) {
 	};
 
 	return (
-		<div className="fixed inset-0 bg-black bg-opacity-0 flex items-center justify-center z-50">
-			<div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-				<h2 className="text-2xl font-bold mb-4 text-gray-800">
-					Login Required
-				</h2>
-				<p className="mb-4 text-gray-600">Please login to save changes</p>
+		<div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+			<div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md border border-gray-200">
+				<div className="flex justify-between items-start mb-4">
+					<h2 className="text-2xl font-bold text-gray-900">Login Required</h2>
+					<button
+						onClick={onClose}
+						className="text-gray-500 hover:text-gray-700">
+						✕
+					</button>
+				</div>
 
-				{error && <p className="text-red-500 mb-4">{error}</p>}
+				<p className="mb-6 text-gray-600">Please login to save changes</p>
+
+				{error && (
+					<div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+						{error}
+					</div>
+				)}
 
 				<form onSubmit={handleSubmit}>
-					<div className="mb-4">
-						<label className="block text-gray-700 mb-2" htmlFor="username">
-							Username
-						</label>
-						<input
-							id="username"
-							type="text"
-							className="w-full p-2 border border-gray-300 rounded"
-							value={username}
-							onChange={(e) => setUsername(e.target.value)}
-							required
-						/>
+					<div className="space-y-4">
+						<div>
+							<label className="block text-sm font-medium text-gray-700 mb-1">
+								Username
+							</label>
+							<input
+								type="text"
+								className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+								value={username}
+								onChange={(e) => setUsername(e.target.value)}
+								required
+							/>
+						</div>
+
+						<div>
+							<label className="block text-sm font-medium text-gray-700 mb-1">
+								Password
+							</label>
+							<input
+								type="password"
+								className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								required
+							/>
+						</div>
 					</div>
-					<div className="mb-6">
-						<label className="block text-gray-700 mb-2" htmlFor="password">
-							Password
-						</label>
-						<input
-							id="password"
-							type="password"
-							className="w-full p-2 border border-gray-300 rounded"
-							value={password}
-							onChange={(e) => setPassword(e.target.value)}
-							required
-						/>
-					</div>
-					<div className="flex justify-end gap-2">
+
+					<div className="mt-6 flex justify-end gap-3">
 						<button
 							type="button"
 							onClick={onClose}
-							className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+							className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
 							Cancel
 						</button>
 						<button
 							type="submit"
-							className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+							className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
 							Login
 						</button>
 					</div>

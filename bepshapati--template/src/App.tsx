@@ -44,14 +44,6 @@ export default function App() {
 		);
 	};
 
-	const handleCommentChange = (id: string, comment: string) => {
-		setProducts(
-			products.map((product) =>
-				product._id === id ? { ...product, comment } : product
-			)
-		);
-	};
-
 	const handleLogin = async (username: string, password: string) => {
 		try {
 			const response = await fetch("http://localhost:3001/api/login", {
@@ -88,6 +80,37 @@ export default function App() {
 		setIsLoggedIn(false);
 	};
 
+	const handleSaveComment = async (id: string, comment: string) => {
+		const auth = localStorage.getItem("auth");
+		if (!auth) throw new Error("Not authenticated");
+
+		// Find the current product to get its ratings
+		const product = products.find((p) => p._id === id);
+		if (!product) throw new Error("Product not found");
+
+		const payload = {
+			comment,
+			lastModifiedAt: new Date().toISOString(),
+		};
+
+		const response = await fetch(`http://localhost:3001/api/products/${id}`, {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Basic ${auth}`,
+			},
+			body: JSON.stringify(payload),
+		});
+
+		if (!response.ok) {
+			const error = await response.json();
+			throw new Error(error.message || "Failed to save comment");
+		}
+
+		return response.json();
+	};
+
+	// Simplified handleSave for ratings only
 	const handleSave = async () => {
 		try {
 			if (!isLoggedIn || !currentUser) {
@@ -105,9 +128,7 @@ export default function App() {
 
 			const authHeader = `Basic ${auth}`;
 			let ratingChanges = 0;
-			let commentChanges = 0;
 
-			// First get original products for comparison
 			const originalProducts = await fetchProducts();
 
 			await Promise.all(
@@ -117,39 +138,33 @@ export default function App() {
 					);
 					if (!originalProduct) return;
 
-					// Check for rating changes
 					const hadRatingChange =
 						originalProduct.ratings.naim !== product.ratings.naim ||
 						originalProduct.ratings.nifar !== product.ratings.nifar ||
 						originalProduct.ratings.afia !== product.ratings.afia ||
 						originalProduct.ratings.sijil !== product.ratings.sijil;
 
-					// Check for comment changes
-					const hadCommentChange = originalProduct.comment !== product.comment;
-
-					if (hadRatingChange || hadCommentChange) {
-						await saveProduct(product, authHeader);
-						if (hadRatingChange) ratingChanges++;
-						if (hadCommentChange) commentChanges++;
+					if (hadRatingChange) {
+						await saveProduct(
+							{
+								...product,
+								comment: undefined,
+							},
+							authHeader
+						);
+						ratingChanges++;
 					}
 				})
 			);
 
-			// Show appropriate notification using custom functions
-			if (ratingChanges > 0 && commentChanges > 0) {
-				showSuccess(
-					`${ratingChanges} rating(s) and ${commentChanges} comment(s) saved!`
-				);
-			} else if (ratingChanges > 0) {
+			if (ratingChanges > 0) {
 				showSuccess(`${ratingChanges} rating(s) saved!`);
-			} else if (commentChanges > 0) {
-				showSuccess(`${commentChanges} comment(s) saved!`);
 			} else {
-				showSuccess("No changes to save");
+				showSuccess("No rating changes to save");
 			}
 		} catch (error) {
 			console.error("Save error:", error);
-			showError("Failed to save changes. Please try again.");
+			showError("Failed to save ratings. Please try again.");
 
 			if (error.message?.includes("Unauthorized")) {
 				handleLogout();
@@ -193,7 +208,7 @@ export default function App() {
 							key={product._id}
 							product={product}
 							onRatingChange={handleRatingChange}
-							onCommentChange={handleCommentChange}
+							onSaveComment={handleSaveComment}
 							currentUser={currentUser}
 						/>
 					))}
