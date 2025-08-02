@@ -6,6 +6,9 @@ import { CatalogueRow } from "./components/CatalogueRow";
 import { fetchProducts, saveProduct } from "./api/products";
 import { useEffect } from "react";
 import { LoginModal } from "./components/LoginModal";
+import { showSuccess, showError } from "./components/Notification";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
 	const [products, setProducts] = useState<ProductAPI[]>([]);
@@ -101,34 +104,56 @@ export default function App() {
 			}
 
 			const authHeader = `Basic ${auth}`;
+			let ratingChanges = 0;
+			let commentChanges = 0;
+
+			// First get original products for comparison
+			const originalProducts = await fetchProducts();
 
 			await Promise.all(
 				products.map(async (product) => {
-					try {
+					const originalProduct = originalProducts.find(
+						(p) => p._id === product._id
+					);
+					if (!originalProduct) return;
+
+					// Check for rating changes
+					const hadRatingChange =
+						originalProduct.ratings.naim !== product.ratings.naim ||
+						originalProduct.ratings.nifar !== product.ratings.nifar ||
+						originalProduct.ratings.afia !== product.ratings.afia ||
+						originalProduct.ratings.sijil !== product.ratings.sijil;
+
+					// Check for comment changes
+					const hadCommentChange = originalProduct.comment !== product.comment;
+
+					if (hadRatingChange || hadCommentChange) {
 						await saveProduct(product, authHeader);
-					} catch (productError) {
-						console.error(`Error saving product ${product._id}:`, productError);
-						throw productError; // Re-throw to be caught by outer catch
+						if (hadRatingChange) ratingChanges++;
+						if (hadCommentChange) commentChanges++;
 					}
 				})
 			);
-		} catch (error) {
-			console.error("Error saving products:", {
-				message: error.message,
-				response: error.response?.data,
-				status: error.response?.status,
-			});
 
-			if (error.response?.status === 401) {
-				console.warn("Unauthorized - clearing auth and showing login modal");
-				setIsLoggedIn(false);
-				setCurrentUser(null);
-				setShowLoginModal(true);
-				localStorage.removeItem("auth");
-				localStorage.removeItem("user");
+			// Show appropriate notification using custom functions
+			if (ratingChanges > 0 && commentChanges > 0) {
+				showSuccess(
+					`${ratingChanges} rating(s) and ${commentChanges} comment(s) saved!`
+				);
+			} else if (ratingChanges > 0) {
+				showSuccess(`${ratingChanges} rating(s) saved!`);
+			} else if (commentChanges > 0) {
+				showSuccess(`${commentChanges} comment(s) saved!`);
 			} else {
-				// Handle other errors without logging out
-				setAuthError("Failed to save products. Please try again.");
+				showSuccess("No changes to save");
+			}
+		} catch (error) {
+			console.error("Save error:", error);
+			showError("Failed to save changes. Please try again.");
+
+			if (error.message?.includes("Unauthorized")) {
+				handleLogout();
+				setShowLoginModal(true);
 			}
 		}
 	};
@@ -198,6 +223,18 @@ export default function App() {
 					error={authError}
 				/>
 			)}
+			<ToastContainer
+				position="bottom-right"
+				autoClose={3000}
+				hideProgressBar={false}
+				newestOnTop
+				closeOnClick
+				rtl={false}
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover
+				theme="light"
+			/>
 		</div>
 	);
 }
