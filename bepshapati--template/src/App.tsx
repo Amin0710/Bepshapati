@@ -197,7 +197,7 @@ export default function App() {
 				</div>
 
 				<div className="p-2 sm:p-6">
-					<div className="grid grid-cols-3 gap-4 items-center border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+					<div className="hidden sm:grid grid-cols-3 gap-4 items-center border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
 						<div className="font-bold text-blue-600 text-center">Image</div>
 						<div className="font-bold text-blue-600 text-center">Rating</div>
 						<div className="font-bold text-blue-600 text-center">Comments</div>
