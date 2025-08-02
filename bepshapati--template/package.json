@@ -4,11 +4,12 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"frontend": "vite",
-		"backend": "set NODE_OPTIONS=--loader ts-node/esm&& ts-node server/index.ts",
-		"backend:dev": "nodemon --exec npm run backend",
 		"dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-		"build": "vite build && tsc server/*.ts",
+		"frontend": "vite",
+		"backend": "node --loader ts-node/esm server/index.ts",
+		"backend:dev": "nodemon --exec npm run backend",
+		"build": "vite build && tsc --project tsconfig.json",
+		"start": "node server/dist/index.js",
 		"lint": "eslint .",
 		"preview": "vite preview"
 	},

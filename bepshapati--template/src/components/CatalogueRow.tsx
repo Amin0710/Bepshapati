@@ -1,6 +1,6 @@
 //CatalogueRowProps
 import { StarRating } from "./StarRating";
-import type { ProductAPI, Reviewer } from "../types/types";
+import type { ProductAPI, Reviewer } from "../../shared/types";
 import ImageCarousel from "./ImageCarousel";
 import { useEffect, useState } from "react";
 import { CommentSection } from "./CommentSection";

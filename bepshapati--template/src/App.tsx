@@ -1,6 +1,6 @@
 // src/App.tsx
 import { useState } from "react";
-import type { ProductAPI, Reviewer } from "./types/types";
+import type { ProductAPI, Reviewer } from "../shared/types";
 import Header from "./components/Header";
 import { CatalogueRow } from "./components/CatalogueRow";
 import { fetchProducts, saveProduct } from "./api/products";

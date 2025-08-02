@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { Express } from "express";
 import cors from "cors";
 import { connectToDB, db } from "./db.js";
-import { ProductDB, User } from "../src/types/types.js";
+import { ProductDB, User } from "../shared/types.js";
 import { MongoServerError, ObjectId } from "mongodb";
 
 const app: Express = express();

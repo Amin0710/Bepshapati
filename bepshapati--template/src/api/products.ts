@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ProductAPI } from "../types/types";
+import { ProductAPI } from "../../shared/types";
 
 const API_BASE = "http://localhost:3001/api";
 

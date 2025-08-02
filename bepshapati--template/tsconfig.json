@@ -1,18 +1,14 @@
 {
 	"compilerOptions": {
+		"target": "ES2022",
 		"module": "ESNext",
 		"moduleResolution": "node",
-		"target": "ES2022",
-		"outDir": "./dist",
-		"rootDir": "./",
+		"outDir": "server/dist",
 		"strict": true,
 		"esModuleInterop": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
 	},
-	"ts-node": {
-		"esm": true,
-		"experimentalSpecifierResolution": "node",
-		"swc": true
-	},
-	"include": ["server/**/*", "src/types/**/*"]
+	"include": ["server/**/*.ts", "shared/**/*.ts", "api/db.ts", "api/index.ts"],
+	"exclude": ["node_modules"]
 }
