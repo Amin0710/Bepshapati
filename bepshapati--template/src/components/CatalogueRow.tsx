@@ -87,9 +87,14 @@ export function CatalogueRow({
 							type="number"
 							min={0}
 							max={10}
+							step={0.5} // This allows 0.5 increments
 							value={userRatingValue}
 							onChange={(e) => {
-								const newRating = Number(e.target.value);
+								let newRating = Number(e.target.value);
+								// Ensure value stays within bounds and is multiple of 0.5
+								newRating = Math.max(0, Math.min(10, newRating));
+								newRating = Math.round(newRating * 2) / 2; // Round to nearest 0.5
+
 								handleTempRatingChange(
 									product._id ?? "",
 									currentUser.username as Reviewer,
