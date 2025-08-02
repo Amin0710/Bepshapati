@@ -24,4 +24,11 @@ export interface ProductAPI {
 	createdAt?: Date;
 }
 
+export interface User {
+	_id?: string;
+	username: string;
+	name: string;
+	role: string;
+}
+
 export type Reviewer = keyof Rating;

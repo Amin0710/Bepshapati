@@ -3,15 +3,20 @@ import { useState } from "react";
 interface StarRatingProps {
 	value: number;
 	onChange?: (value: number) => void;
+	readOnly?: boolean;
 }
 
-export function StarRating({ value, onChange }: StarRatingProps) {
+export function StarRating({
+	value,
+	onChange,
+	readOnly = false,
+}: StarRatingProps) {
 	const [hover, setHover] = useState<number | null>(null);
 	const fullStars = Math.floor(value);
 	const showHalfStar = value % 1 >= 0.5;
 
 	return (
-		<div className="flex items-center">
+		<div className="flex items-center space-x-1">
 			{[...Array(10)].map((_, i) => {
 				const starValue = i + 1;
 				const isActive =
@@ -25,12 +30,13 @@ export function StarRating({ value, onChange }: StarRatingProps) {
 					<button
 						key={i}
 						type="button"
-						className={`relative text-lg w-5 h-5 ${
-							onChange ? "cursor-pointer" : "cursor-default"
+						className={`relative text-xl w-6 h-6 ${
+							onChange && !readOnly ? "cursor-pointer" : "cursor-default"
 						}`}
-						onClick={() => onChange?.(starValue)}
-						onMouseEnter={() => onChange && setHover(starValue)}
-						onMouseLeave={() => onChange && setHover(null)}>
+						onClick={() => !readOnly && onChange?.(starValue)}
+						onMouseEnter={() => !readOnly && onChange && setHover(starValue)}
+						onMouseLeave={() => !readOnly && onChange && setHover(null)}
+						disabled={readOnly}>
 						{/* Gray background star (always shows) */}
 						<span className="text-gray-300 absolute inset-0">★</span>
 

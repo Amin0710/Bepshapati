@@ -2,7 +2,7 @@ import "dotenv/config";
 import express, { Express } from "express";
 import cors from "cors";
 import { connectToDB, db } from "./db.js";
-import { ProductDB } from "../src/types/types.js";
+import { ProductDB, User } from "../src/types/types.js";
 import { MongoServerError, ObjectId } from "mongodb";
 
 const app: Express = express();
@@ -25,12 +25,12 @@ const PORT = process.env.PORT || 3001;
 })();
 
 // Routes
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
 	res.send("Bepshapati API is running!");
 });
 
 // Products API routes
-app.get("/api/products", async (req, res) => {
+app.get("/api/products", async (_req, res) => {
 	try {
 		const products = await db.collection("products").find().toArray();
 		res.json(products);
@@ -118,69 +118,80 @@ app.post("/api/products", async (req, res) => {
 	}
 });
 
+// Update your PUT endpoint to explicitly handle rating
+// Extend express.Request to include user property
 app.put("/api/products/:id", async (req, res) => {
 	try {
-		const productIdStr = req.params.id;
+		const { id } = req.params;
+		const updates = req.body;
 
-		// Validate ObjectId format
-		if (!ObjectId.isValid(productIdStr)) {
+		if (!ObjectId.isValid(id)) {
 			return res.status(400).json({ error: "Invalid product ID format" });
 		}
 
-		const { ratings, comment } = req.body;
+		// Require at least one rating field (like ratings.naim, ratings.nifar)
+		const isUpdatingRatings = Object.keys(updates).some((key) =>
+			key.startsWith("ratings.")
+		);
 
-		if (!ratings && comment === undefined) {
-			return res.status(400).json({ error: "Must provide ratings or comment" });
+		if (!isUpdatingRatings) {
+			return res.status(400).json({ error: "Rating is required" });
 		}
 
-		const updateData: Partial<ProductDB> = {};
-
-		if (ratings) {
-			const existingProduct = await db
-				.collection<ProductDB>("products")
-				.findOne({ _id: new ObjectId(productIdStr) });
-			if (!existingProduct) {
-				return res.status(404).json({ error: "Product not found" });
-			}
-
-			updateData.ratings = {
-				nifar: ratings.nifar ?? existingProduct.ratings.nifar,
-				afia: ratings.afia ?? existingProduct.ratings.afia,
-				sijil: ratings.sijil ?? existingProduct.ratings.sijil,
-				naim: ratings.naim ?? existingProduct.ratings.naim,
-			};
-		}
-
-		if (comment !== undefined) {
-			updateData.comment = comment;
-		}
+		// Add metadata
+		// updates.lastModifiedBy = req.user?._id;
+		updates.lastModifiedAt = new Date();
 
 		const result = await db
-			.collection<Omit<ProductDB, "_id"> & { _id: ObjectId }>("products")
-			.updateOne({ _id: new ObjectId(productIdStr) }, { $set: updateData });
+			.collection("products")
+			.updateOne({ _id: new ObjectId(id) }, { $set: updates });
 
 		if (result.matchedCount === 0) {
 			return res.status(404).json({ error: "Product not found" });
 		}
 
-		res.status(200).json({
-			message: "Ratings/comment updated successfully",
-			updatedFields: Object.keys(updateData),
-		});
-	} catch (error: unknown) {
-		if (error instanceof Error) {
-			res.status(500).json({ error: error.message });
-		} else {
-			res.status(500).json({ error: "Unknown error occurred" });
-		}
+		res.json({ message: "Product updated successfully", product: updates });
+	} catch (error) {
+		console.error("Error updating product:", error);
+		res.status(500).json({ error: "Internal server error" });
 	}
 });
 
 // Users API routes
-app.get("/api/users", async (req, res) => {
+app.get("/api/users", async (_req, res) => {
 	try {
 		const users = await db.collection("users").find().toArray();
 		res.json(users);
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			res.status(500).json({ error: error.message });
+		} else {
+			res.status(500).json({ error: "An unknown error occurred" });
+		}
+	}
+});
+
+// Login route
+app.post("/api/login", async (req, res) => {
+	try {
+		const { username, password } = req.body;
+		const user = await db.collection<User>("users").findOne({
+			_id: username,
+			password,
+		});
+
+		if (!user) {
+			return res.status(401).json({ error: "Invalid credentials" });
+		}
+
+		res.json({
+			message: "Login successful",
+			user: {
+				username: user._id,
+				name: user.name,
+				role: user.role,
+			},
+		});
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			res.status(500).json({ error: error.message });
